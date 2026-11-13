@@ -1,4 +1,5 @@
 // Libraries - need the standards along with string and time access
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,10 +9,50 @@
 int get_world_choice(void);
 
 int main(void) {
+  // I am moving the string and later graphic data to a data directory. file
+  // readings happen here
+  FILE *story_file = fopen("data/worlds.json", "r");
+
+  if (story_file == NULL) {
+    perror("Could no open world data");
+    return EXIT_FAILURE;
+  }
+
+  // This is a debug print check
+  printf("World data file opened succefully\n");
+  char text[256];
+
+  char json_text[8192] = "";
+  size_t used = 0;
+
+  // Read and stor from the text file(json, stored in story_file) with NULL
+  // check stopping the read(it means the file was read, or there's a problem)
+  while (fgets(text, sizeof text, story_file) != NULL) {
+    size_t piece_length = strlen(text);
+
+    if (piece_length >= sizeof json_text - used) {
+      fprintf(stderr, "World data is too large\n");
+      fclose(story_file);
+      return EXIT_FAILURE;
+    }
+
+    memcpy(json_text + used, text, piece_length);
+    used += piece_length;
+    json_text[used] = '\0';
+  }
+  // Catch any loading errors
+  if (ferror(story_file)) {
+    perror("Could not load world data");
+    fclose(story_file);
+    return EXIT_FAILURE;
+  }
+  // Close the file
+  fclose(story_file);
+  printf("%s", json_text);
   // Seed the random selection to be random by getting current time. NULL looks
   // scary but it means it doesn't need to be save other than to the seed.
   srand((unsigned int)time(NULL));
-  // first, let's create an array with our wounsigned int)time(NULL));))ray
+  // first, let's create an array with our wounsigned int)time(NULL));))r
   // where each row is an array of charactyers(up to 8)
   char world_names[3][8] = {"Machina", "Sirocco", "Gloam"};
   const char *world_descriptions[3] = {
@@ -21,11 +62,14 @@ int main(void) {
   const char *clues[3] = {
       "Bart's transmission crackles: 'The robots won't give me any pats!'",
       "Bart's transmission crackles: 'There's sand in my fur and in the ship!'",
-      "Bart's transmission crackles: 'I can't see through this mist. Was that a ghost?'"};
-  const char *search_scenes[3] = {
-      "You land among towering metal buildings. Robots help you search the city.",
-      "You cross the dunes, checking behind rocks as sand blows around your boots.",
-      "You step into the mist, calling for Bart. Something rustles in the darkness."};
+      "Bart's transmission crackles: 'I can't see through this mist. Was that "
+      "a ghost?'"};
+  const char *search_scenes[3] = {"You land among towering metal buildings. "
+                                  "Robots help you search the city.",
+                                  "You cross the dunes, checking behind rocks "
+                                  "as sand blows around your boots.",
+                                  "You step into the mist, calling for Bart. "
+                                  "Something rustles in the darkness."};
   // Game loop
   while (1) {
     // Choose Bart's world first so the clue matches his hiding place.

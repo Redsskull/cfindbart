@@ -1,0 +1,25 @@
+{
+  "worlds": [
+    {
+      "id": "machina",
+      "name": "Machina",
+      "description": "A sprawling megacity inhabited by robots.",
+      "clue": "Bart's transmission crackles: 'The robots won't give me any pats!'",
+      "search_scene": "You land among the towering metal buildings. Robots help you search the city."
+    },
+    {
+      "id": "sirocco",
+      "name": "Sirocco",
+      "description": "A desert world of dunes and sandstorms.",
+      "clue": "Bart's transmission crackles: 'There's sand in my fur and in the ship!'",
+      "search_scene": "You cross the dunes, checking behind rocks as sand blows around your boots."
+    },
+    {
+      "id": "gloam",
+      "name": "Gloam",
+      "description": "A dark, spooky world wrapped in mist.",
+      "clue": "Bart's transmission crackles: 'I can't see through this mist. Was that a ghost?'",
+      "search_scene": "You step into the mist, calling for Bart. Something rustles in the darkness."
+    }
+  ]
+}
