@@ -1,5 +1,5 @@
 // Libraries - need the standards along with string and time access
-#include <stddef.h>
+#include <jansson.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -9,46 +9,26 @@
 int get_world_choice(void);
 
 int main(void) {
-  // I am moving the string and later graphic data to a data directory. file
-  // readings happen here
-  FILE *story_file = fopen("data/worlds.json", "r");
+  json_error_t error;
+  json_t *document = json_load_file("data/worlds.json", 0, &error);
 
-  if (story_file == NULL) {
-    perror("Could no open world data");
+  if (document == NULL) {
+    fprintf(stderr, "Could not load worlds: %s (line %d)\n", error.text,
+            error.line);
+    return EXIT_FAILURE;
+  }
+  json_t *worlds = json_object_get(document, "worlds");
+  json_t *first_world = json_array_get(worlds, 0);
+  json_t *first_world_name = json_object_get(first_world, "name");
+  const char *name = json_string_value(first_world_name);
+  if (name == NULL) {
+    fprintf(stderr, "First world has no valiud name string\n");
+    json_decref(document);
     return EXIT_FAILURE;
   }
 
-  // This is a debug print check
-  printf("World data file opened succefully\n");
-  char text[256];
-
-  char json_text[8192] = "";
-  size_t used = 0;
-
-  // Read and stor from the text file(json, stored in story_file) with NULL
-  // check stopping the read(it means the file was read, or there's a problem)
-  while (fgets(text, sizeof text, story_file) != NULL) {
-    size_t piece_length = strlen(text);
-
-    if (piece_length >= sizeof json_text - used) {
-      fprintf(stderr, "World data is too large\n");
-      fclose(story_file);
-      return EXIT_FAILURE;
-    }
-
-    memcpy(json_text + used, text, piece_length);
-    used += piece_length;
-    json_text[used] = '\0';
-  }
-  // Catch any loading errors
-  if (ferror(story_file)) {
-    perror("Could not load world data");
-    fclose(story_file);
-    return EXIT_FAILURE;
-  }
-  // Close the file
-  fclose(story_file);
-  printf("%s", json_text);
+  printf("Load world %s\n", name);
+  json_decref(document);
   // Seed the random selection to be random by getting current time. NULL looks
   // scary but it means it doesn't need to be save other than to the seed.
   srand((unsigned int)time(NULL));
